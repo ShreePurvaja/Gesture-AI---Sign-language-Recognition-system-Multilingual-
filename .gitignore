@@ -1,0 +1,10 @@
+venv/
+.venv/
+
+dataset/
+
+*.pkl
+*.npy
+
+__pycache__/
+*.pyc

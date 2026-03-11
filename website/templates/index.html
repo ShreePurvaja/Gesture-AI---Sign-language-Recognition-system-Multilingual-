@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GestureAI | Sign Language Translator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.css">
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="animated-bg"></div>
+    
+    <!-- Particle Container -->
+    <div id="particles-js"></div>
+    
+    <!-- Main Container -->
+    <div class="container">
+        
+        <!-- Header with Glassmorphism -->
+        <header class="glass-card header-section">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-hands"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h1 class="animate__animated animate__fadeInDown">Gesture<span class="gradient-text">AI</span></h1>
+                        <p class="tagline animate__animated animate__fadeInUp">
+                            <span class="typing-text"></span>
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="header-stats">
+                    <div class="stat-card">
+                        <i class="fas fa-language"></i>
+                        <span class="stat-number" id="languageCount">3</span>
+                        <span class="stat-label">Languages</span>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-gesture"></i>
+                        <span class="stat-number" id="signCount">30+</span>
+                        <span class="stat-label">Signs</span>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-bolt"></i>
+                        <span class="stat-number" id="latency">0.4s</span>
+                        <span class="stat-label">Latency</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Dashboard -->
+        <div class="dashboard">
+            
+            <!-- Top Control Bar -->
+            <div class="control-bar glass-card">
+                <div class="status-indicator">
+                    <div class="status-pulse" id="statusPulse"></div>
+                    <div class="status-text">
+                        <h3><i class="fas fa-satellite-dish"></i> <span id="statusText">Connecting...</span></h3>
+                        <p id="statusDetail" class="status-subtext">Initializing camera feed</p>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <div class="control-group">
+                        <label for="langSelect"><i class="fas fa-globe"></i> Output Language</label>
+                        <div class="custom-select">
+                            <select id="langSelect" class="language-select">
+                                <option value="all">🌐 All Languages</option>
+                                <option value="en">🇺🇸 English</option>
+                                <option value="ta">🇮🇳 Tamil</option>
+                                <option value="hi">🇮🇳 Hindi</option>
+                            </select>
+                            <div class="select-arrow">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label><i class="fas fa-sliders-h"></i> Settings</label>
+                        <div class="button-group">
+                            <button class="btn-icon" id="toggleHistory" title="Toggle History">
+                                <i class="fas fa-history"></i>
+                            </button>
+                            <button class="btn-icon" id="fullscreenBtn" title="Fullscreen">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                            <button class="btn-icon" id="helpBtn" title="Help">
+                                <i class="fas fa-question-circle"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Grid -->
+            <div class="main-grid">
+                
+                <!-- Video Feed Card -->
+                <div class="video-section glass-card">
+                    <div class="section-header">
+                        <h2><i class="fas fa-video"></i> Live Camera Feed</h2>
+                        <div class="recording-indicator">
+                            <div class="recording-dot"></div>
+                            <span>LIVE</span>
+                        </div>
+                    </div>
+                    
+                    <div class="video-container" id="videoContainer">
+                        <div class="video-overlay">
+                            <div class="hand-guide">
+                                <div class="hand-icon animate__animated animate__pulse animate__infinite">
+                                    <i class="fas fa-hand-peace"></i>
+                                </div>
+                                <p>Show your hand to the camera</p>
+                            </div>
+                        </div>
+                        <img src="{{ url_for('video') }}" class="video-feed" id="videoFeed">
+                        <div class="video-stats">
+                            <span><i class="fas fa-hand-pointer"></i> <span id="handConfidence">0%</span> Confidence</span>
+                            <span><i class="fas fa-clock"></i> <span id="frameRate">30</span> FPS</span>
+                        </div>
+                    </div>
+                    
+                    <div class="gesture-hint animate__animated animate__bounceIn">
+                        <i class="fas fa-lightbulb"></i>
+                        <span id="currentGestureHint">Try making an 'A' sign</span>
+                    </div>
+                </div>
+
+                <!-- Translation Panel -->
+                <div class="translation-panel">
+                    
+                    <!-- Real-time Translation Card -->
+                    <div class="translation-card glass-card">
+                        <div class="section-header">
+                            <h2><i class="fas fa-language"></i> Live Translation</h2>
+                            <div class="translation-mode" id="translationMode">
+                                <span class="mode-badge">ALL LANGUAGES</span>
+                            </div>
+                        </div>
+                        
+                        <div class="translation-output">
+                            <div class="language-output" id="enOutput">
+                                <div class="lang-header">
+                                    <span class="flag">🇺🇸</span>
+                                    <span class="lang-name">English</span>
+                                    <span class="lang-code">EN</span>
+                                </div>
+                                <div class="translation-text animate-text" id="enText">Show your hand to begin</div>
+                                <div class="confidence-meter">
+                                    <div class="confidence-bar" id="enConfidence"></div>
+                                    <span id="enConfidenceText">0%</span>
+                                </div>
+                            </div>
+                            
+                            <div class="language-output" id="taOutput">
+                                <div class="lang-header">
+                                    <span class="flag">🇮🇳</span>
+                                    <span class="lang-name">Tamil</span>
+                                    <span class="lang-code">TA</span>
+                                </div>
+                                <div class="translation-text animate-text" id="taText">கையை காட்டி தொடங்கவும்</div>
+                                <div class="confidence-meter">
+                                    <div class="confidence-bar" id="taConfidence"></div>
+                                    <span id="taConfidenceText">0%</span>
+                                </div>
+                            </div>
+                            
+                            <div class="language-output" id="hiOutput">
+                                <div class="lang-header">
+                                    <span class="flag">🇮🇳</span>
+                                    <span class="lang-name">Hindi</span>
+                                    <span class="lang-code">HI</span>
+                                </div>
+                                <div class="translation-text animate-text" id="hiText">शुरू करने के लिए अपना हाथ दिखाएं</div>
+                                <div class="confidence-meter">
+                                    <div class="confidence-bar" id="hiConfidence"></div>
+                                    <span id="hiConfidenceText">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="translation-actions">
+                            <button class="btn-action" id="copyAllBtn">
+                                <i class="fas fa-copy"></i> Copy All
+                            </button>
+                            <button class="btn-action" id="speakBtn">
+                                <i class="fas fa-volume-up"></i> Speak
+                            </button>
+                            <button class="btn-action" id="clearBtn">
+                                <i class="fas fa-eraser"></i> Clear
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- History Card -->
+                    <div class="history-card glass-card">
+                        <div class="section-header">
+                            <h2><i class="fas fa-history"></i> Recent Signs</h2>
+                            <button class="btn-icon-small" id="clearHistoryBtn" title="Clear History">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="history-timeline" id="historyList">
+                            <!-- History items will be added here -->
+                            <div class="history-empty">
+                                <i class="fas fa-history"></i>
+                                <p>No signs detected yet</p>
+                                <small>Make signs to see history here</small>
+                            </div>
+                        </div>
+                        
+                        <div class="history-summary">
+                            <div class="summary-item">
+                                <i class="fas fa-sign-language"></i>
+                                <span>Total Signs: <strong id="totalSigns">0</strong></span>
+                            </div>
+                            <div class="summary-item">
+                                <i class="fas fa-clock"></i>
+                                <span>Last Sign: <strong id="lastSignTime">--:--</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Stats Bar -->
+            <div class="stats-bar glass-card">
+                <div class="stat-item">
+                    <i class="fas fa-hand-sparkles"></i>
+                    <div class="stat-info">
+                        <span class="stat-value" id="detectedGestures">0</span>
+                        <span class="stat-label">Gestures Today</span>
+                    </div>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <i class="fas fa-broadcast-tower"></i>
+                    <div class="stat-info">
+                        <span class="stat-value" id="connectionQuality">Excellent</span>
+                        <span class="stat-label">Connection</span>
+                    </div>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <i class="fas fa-robot"></i>
+                    <div class="stat-info">
+                        <span class="stat-value" id="aiAccuracy">98.5%</span>
+                        <span class="stat-label">AI Accuracy</span>
+                    </div>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <i class="fas fa-stopwatch"></i>
+                    <div class="stat-info">
+                        <span class="stat-value" id="responseTime">0.4s</span>
+                        <span class="stat-label">Response Time</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tutorial Modal -->
+        <div class="modal" id="helpModal">
+            <div class="modal-content glass-card">
+                <div class="modal-header">
+                    <h2><i class="fas fa-graduation-cap"></i> How to Use GestureAI</h2>
+                    <button class="modal-close" id="closeHelpModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="tutorial-steps">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h3>Position Your Hand</h3>
+                                <p>Make sure your hand is clearly visible in the camera frame with good lighting.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h3>Make Clear Signs</h3>
+                                <p>Form distinct sign language gestures and hold them steady for 1-2 seconds.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h3>View Translations</h3>
+                                <p>See real-time translations in multiple languages with confidence scores.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h3>Switch Languages</h3>
+                                <p>Use the dropdown to select your preferred output language or view all.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/static/script.js"></script>
+</body>
+</html>
